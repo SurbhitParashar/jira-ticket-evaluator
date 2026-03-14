@@ -3,6 +3,7 @@ import { db, evaluationsTable, requirementResultsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { CreateEvaluationBody, GetEvaluationParams, StreamEvaluationParams } from "@workspace/api-zod";
 import { runEvaluation } from "../agents/orchestrator.js";
+import { emitEvent, subscribeToEvaluation } from "../agents/eventBus.js";
 import { randomUUID } from "crypto";
 
 const router: IRouter = Router();
@@ -47,13 +48,15 @@ router.post("/evaluations", async (req, res) => {
       body.jiraEmail,
       body.jiraApiToken,
       body.githubToken,
-      () => {}
-    ).catch(() => {});
+      (event) => emitEvent(id, event)
+    ).catch((err) => {
+      emitEvent(id, { type: "error", message: err instanceof Error ? err.message : "Unknown error" });
+    });
 
     res.status(201).json(evaluation);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    if (message.includes("parse")) {
+    if (message.includes("parse") || message.includes("validation")) {
       res.status(400).json({ error: "validation_error", message });
     } else {
       res.status(500).json({ error: "internal_error", message });
@@ -117,39 +120,17 @@ router.get("/evaluations/:id/stream", async (req, res) => {
       return;
     }
 
-    const body = await req.body;
-    const jiraTicketUrl = existing.jiraTicketUrl;
-    const githubPrUrl = existing.githubPrUrl;
-
-    const credentialsHeader = req.headers["x-eval-credentials"];
-    let jiraEmail = "";
-    let jiraApiToken = "";
-    let githubToken = "";
-
-    if (typeof credentialsHeader === "string") {
-      try {
-        const creds = JSON.parse(Buffer.from(credentialsHeader, "base64").toString());
-        jiraEmail = creds.jiraEmail || "";
-        jiraApiToken = creds.jiraApiToken || "";
-        githubToken = creds.githubToken || "";
-      } catch {}
-    }
-
-    res.write(`data: ${JSON.stringify({ type: "step", message: "Starting evaluation..." })}\n\n`);
-
-    await runEvaluation(
-      id,
-      jiraTicketUrl,
-      githubPrUrl,
-      jiraEmail,
-      jiraApiToken,
-      githubToken,
-      (event) => {
-        res.write(`data: ${JSON.stringify(event)}\n\n`);
+    const unsubscribe = subscribeToEvaluation(id, (event) => {
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+      if (event.type === "done" || event.type === "error") {
+        unsubscribe();
+        res.end();
       }
-    );
+    });
 
-    res.end();
+    req.on("close", () => {
+      unsubscribe();
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.write(`data: ${JSON.stringify({ type: "error", message })}\n\n`);

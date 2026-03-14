@@ -204,7 +204,7 @@ export default function EvaluationDetail() {
             <div className="sticky top-6">
               <TerminalOutput 
                 messages={messages} 
-                isDone={!isRunning && isDone} 
+                isDone={!isRunning || isDone} 
                 className="h-[600px]"
               />
               

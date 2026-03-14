@@ -39,7 +39,7 @@ export function useEvaluationStream(evaluationId?: string, isRunning?: boolean) 
             es.close();
             esRef.current = null;
           } else if (data.type === "error") {
-            setMessages((prev) => [...prev, `[ERROR] ${data.error}`]);
+            setMessages((prev) => [...prev, `[ERROR] ${data.message ?? data.error}`]);
             es.close();
             esRef.current = null;
           }

@@ -31,9 +31,15 @@ export function TerminalOutput({ messages, isDone, className }: TerminalOutputPr
         className="flex-1 p-4 overflow-y-auto space-y-1 scroll-smooth"
       >
         {messages.length === 0 ? (
-          <div className="text-muted-foreground/50 italic flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse" /> Waiting for agent logs...
-          </div>
+          isDone ? (
+            <div className="text-success/70 italic flex items-center gap-2">
+              <span className="text-success">✔</span> Evaluation complete.
+            </div>
+          ) : (
+            <div className="text-muted-foreground/50 italic flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse" /> Waiting for agent logs...
+            </div>
+          )
         ) : (
           messages.map((msg, i) => (
             <motion.div
