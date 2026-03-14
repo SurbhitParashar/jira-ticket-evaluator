@@ -1,0 +1,108 @@
+Jira Ticket Evaluator
+Automating Pull Request Compliance with AI Agents & MCP
+Track
+AI Engineering / Developer Tooling
+Difficulty
+Intermediate — Advanced
+Team Size
+1 – 4 participants
+Submission
+GitHub Repository + Presentation Deck
+1. OVERVIEW
+Modern software teams rely on Jira to capture requirements, track work, and communicate intent. Yet verifying whether a Pull Request (PR) actually satisfies the requirements described in its linked Jira ticket is still a largely manual, error-prone task — one that slows code review and lets requirement drift slip into production.
+This hackathon challenges participants to build an AI-powered Jira Ticket Evaluator: a system that takes a Jira ticket and a GitHub PR as inputs, then autonomously decides whether the code changes satisfy the stated requirements.
+2. PROBLEM STATEMENT
+Given:
+▪ A Jira ticket describing a feature, bug fix, or improvement — including acceptance criteria, description, and any attached specifications.
+▪ A GitHub Pull Request (PR) containing the corresponding code changes, commit messages, and PR description.
+Build a system that:
+▪ Parses and understands the requirements captured in the Jira ticket.
+▪ Retrieves and analyses the diff, file changes, and metadata of the GitHub PR.
+▪ Produces a structured verdict — Pass / Partial / Fail — with clear reasoning for each requirement.
+▪ Optionally executes or generates custom validation tests to provide additional evidence for its verdict.
+3. TECHNICAL REQUIREMENTS
+3.1 Mandatory Technologies
+All submissions must make use of the following:
+▪ GitHub — The PR (and optionally the full repository) must be hosted on GitHub. Participants will interact with the GitHub API and/or GitHub MCP server to retrieve PR data.
+▪ MCP (Model Context Protocol) — At least one MCP server must be integrated to provide tool-use capability to the agent (e.g., the GitHub MCP server, a custom Jira MCP server, or a file-system MCP server for code access).
+▪ AI Agents — The core evaluation logic must be agent-driven. A single LLM call is not sufficient; the system must demonstrate multi-step reasoning, tool invocation, and structured output.
+▪ AI APIs — Use any publicly available LLM API (OpenAI, Anthropic, Google Gemini, etc.) for the reasoning layer.
+3.2 Optional Enhancements
+▪ Custom test generation — the agent writes and executes tests (unit, integration, or static analysis) to validate specific acceptance criteria.
+▪ Multi-agent architectures — separate agents for parsing, retrieval, test execution, and verdict synthesis.
+▪ Support for additional ticket sources (Linear, Shortcut, GitHub Issues, etc.).
+▪ A web UI or CLI dashboard for displaying results.
+▪ Confidence scoring and traceability — mapping each verdict point back to specific lines of code and ticket requirements.
+4. INPUTS & OUTPUTS
+4.1 Required Inputs
+Input
+Format
+Notes
+Jira Ticket
+JSON / Jira REST API
+Title, description, acceptance criteria, priority
+GitHub PR URL
+GitHub REST / GraphQL API
+Diff, files changed, PR description, comments
+4.2 Expected Output
+▪ Overall verdict: Pass / Partial / Fail
+▪ Per-requirement breakdown: each requirement from the ticket evaluated individually.
+▪ Evidence: specific file paths, line numbers, or code snippets supporting each verdict point.
+▪ Test results (optional): output from any custom tests the system generated or executed.
+▪ Confidence score (optional): a numeric measure of the agent's certainty.
+5. EVALUATION CRITERIA
+Submissions will be scored by the judging panel across five dimensions:
+Criterion
+Description
+Weight
+Accuracy
+Correctness of the Pass/Partial/Fail verdict against known ground-truth test cases.
+30%
+Agent Design
+Quality of agentic reasoning: tool selection, multi-step planning, and structured output.
+25%
+MCP Integration
+Depth and creativity of MCP server usage beyond basic API calls.
+20%
+Test Generation
+Quality and relevance of any custom tests written or executed by the system.
+15%
+Presentation & Demo
+Clarity of the technical explanation and live demonstration.
+10%
+6. SUBMISSION GUIDELINES
+6.1 What to Submit
+1. GitHub Repository — A public (or privately shared) GitHub repository containing all source code, configuration files, and a README.md that includes setup instructions, architecture overview, and a usage guide.
+2. Presentation Deck — A PPT/PDF slide deck (submitted alongside the GitHub link) explaining the team's approach, architecture diagrams, screenshots or screen recordings, custom test examples, and results. Teams must include their own images and inputs; stock placeholders are not accepted.
+6.2 Repository Structure (Recommended)
+jira-ticket-evaluator/
+├── README.md # Setup, architecture, usage
+├── src/ # Agent, tools, MCP integrations
+├── tests/ # Custom test generation scripts
+├── examples/ # Sample Jira tickets + PRs used for demo
+└── docs/ # Architecture diagrams, evaluation reports
+6.3 Presentation Deck Requirements
+The slide deck must include all of the following:
+▪ Team name and member introductions.
+▪ Problem framing — how your team interpreted the challenge.
+▪ System architecture diagram (your own, not a template).
+▪ Screenshots or recordings of the system in action with real Jira tickets and PRs.
+▪ Custom test examples: show the input, the generated test, and the result.
+▪ Challenges encountered and how they were resolved.
+▪ Future improvements and potential production use-cases.
+Note: All images, screenshots, and diagrams must be original or attributed. Presentations that use placeholder images or stock slides will be penalised during judging.
+7. RULES & CONSTRAINTS
+▪ Teams must use at least one MCP server for tool-use. Calling the LLM API directly without MCP-mediated tool invocation does not satisfy this requirement.
+▪ The system must handle a minimum of three distinct Jira ticket types: feature request, bug report, and refactor/cleanup.
+▪ No hardcoded logic — the evaluation must be generalised. Systems that only work on the specific example tickets provided during judging will not score above partial marks.
+▪ API keys must not be committed to the repository. Use environment variables and provide a .env.example file.
+▪ All dependencies must be declared in a package manager manifest (package.json, requirements.txt, pyproject.toml, etc.).
+▪ Teams may use any programming language, LLM provider, or MCP server they choose.
+8. SUGGESTED RESOURCES
+▪ Model Context Protocol (MCP) documentation — https://modelcontextprotocol.io
+▪ GitHub MCP Server — github.com/modelcontextprotocol/servers
+▪ Jira REST API Reference — developer.atlassian.com/cloud/jira/platform/rest/v3
+▪ GitHub REST API Documentation — docs.github.com/en/rest
+▪ Anthropic Claude API / OpenAI API / Google Gemini API
+▪ LangGraph / LangChain Agent Framework — for multi-agent orchestration
+Good luck. Build something that makes code review smarter.
