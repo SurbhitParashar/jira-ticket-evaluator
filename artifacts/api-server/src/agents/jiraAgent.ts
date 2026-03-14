@@ -1,3 +1,5 @@
+import { DEMO_JIRA_URL, DEMO_TICKET } from "./demoData.js";
+
 export interface JiraTicket {
   key: string;
   summary: string;
@@ -53,6 +55,10 @@ export async function fetchJiraTicket(
   email: string,
   apiToken: string
 ): Promise<JiraTicket> {
+  if (jiraTicketUrl === DEMO_JIRA_URL || jiraTicketUrl.includes("demo.atlassian.net") || jiraTicketUrl.startsWith("demo://")) {
+    return DEMO_TICKET;
+  }
+
   const urlMatch = jiraTicketUrl.match(/https?:\/\/([^/]+)\/browse\/([A-Z][A-Z0-9]+-\d+)/);
   if (!urlMatch) {
     throw new Error(`Invalid Jira ticket URL: ${jiraTicketUrl}`);

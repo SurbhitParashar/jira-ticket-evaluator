@@ -16,7 +16,8 @@ import {
   CheckCircle2,
   AlertCircle,
   XCircle,
-  Loader2
+  Loader2,
+  Zap
 } from "lucide-react"
 
 import { useCreateEvaluation, useListEvaluations } from "@workspace/api-client-react"
@@ -24,7 +25,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { formatVerdictColor } from "@/lib/utils"
+import { cn, formatVerdictColor } from "@/lib/utils"
+
+const DEMO_VALUES = {
+  jiraTicketUrl: "https://demo.atlassian.net/browse/DEMO-123",
+  githubPrUrl: "https://github.com/demo-org/rate-limit-demo/pull/42",
+  jiraEmail: "demo@example.com",
+  jiraApiToken: "demo-api-token",
+  githubToken: "demo-github-token",
+}
 
 const formSchema = z.object({
   jiraTicketUrl: z.string().url({ message: "Must be a valid URL" }),
@@ -53,6 +62,10 @@ export default function Home() {
       githubToken: "",
     }
   });
+
+  const loadDemo = () => {
+    form.reset(DEMO_VALUES);
+  };
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -119,8 +132,22 @@ export default function Home() {
           >
             <Card className="glass-panel border-white/10">
               <CardHeader>
-                <CardTitle className="text-2xl">New Evaluation</CardTitle>
-                <CardDescription>Provide credentials and URLs to start the agent orchestration.</CardDescription>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-2xl">New Evaluation</CardTitle>
+                    <CardDescription>Provide credentials and URLs to start the agent orchestration.</CardDescription>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={loadDemo}
+                    className="ml-4 shrink-0 border-primary/30 text-primary hover:bg-primary/10"
+                  >
+                    <Zap className="w-4 h-4 mr-1.5" />
+                    Try Demo
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

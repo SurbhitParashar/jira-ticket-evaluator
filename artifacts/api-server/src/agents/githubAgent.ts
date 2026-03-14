@@ -30,6 +30,11 @@ export async function fetchGithubPR(
   prUrl: string,
   githubToken: string
 ): Promise<PullRequestData> {
+  const { DEMO_GITHUB_PR_URL, DEMO_PR } = await import("./demoData.js");
+  if (prUrl === DEMO_GITHUB_PR_URL || prUrl.includes("demo-org/rate-limit-demo") || prUrl.startsWith("demo://")) {
+    return DEMO_PR;
+  }
+
   const urlMatch = prUrl.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/);
   if (!urlMatch) {
     throw new Error(`Invalid GitHub PR URL: ${prUrl}`);
