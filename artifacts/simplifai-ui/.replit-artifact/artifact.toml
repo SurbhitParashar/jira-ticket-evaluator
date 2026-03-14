@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Jira Ticket Evaluator"
+version = "1.0.0"
+id = "artifacts/simplifai-ui"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 25617
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/simplifai-ui run dev"
+
+[services.env]
+PORT = "25617"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/simplifai-ui", "run", "build"]
+publicDir = "artifacts/simplifai-ui/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

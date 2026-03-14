@@ -1,0 +1,17 @@
+packages:
+  "framer-motion": "Animations for cards, stream output, and page transitions"
+  "clsx": "Utility for conditionally joining classNames"
+  "tailwind-merge": "Utility for merging Tailwind CSS classes without style conflicts"
+  "@hookform/resolvers": "Zod form validation resolver for react-hook-form"
+  "react-hook-form": "Performant, flexible and extensible forms with easy-to-use validation"
+  "date-fns": "Modern JavaScript date utility library for human-readable formatting"
+
+images:
+  - path: "artifacts/simplifai-ui/public/images/hero-mesh.png"
+    description: "Dark abstract wireframe gradient mesh in deep indigo, violet, and black, high quality technical developer tool style, minimal"
+    aspect_ratio: "16:9"
+
+notes:
+  - Using generated hooks from @workspace/api-client-react
+  - Defaulting to a dedicated dark-mode professional theme
+  - SSE Stream implemented using EventSource mapped to /api/evaluations/:id/stream

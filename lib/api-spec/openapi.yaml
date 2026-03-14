@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Jira Ticket Evaluator API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: evaluations
+    description: PR Evaluation operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,91 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /evaluations:
+    get:
+      operationId: listEvaluations
+      tags: [evaluations]
+      summary: List all evaluations
+      description: Returns a list of past evaluations
+      responses:
+        "200":
+          description: List of evaluations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Evaluation"
+    post:
+      operationId: createEvaluation
+      tags: [evaluations]
+      summary: Create a new evaluation
+      description: Starts an AI evaluation of a PR against a Jira ticket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEvaluationBody"
+      responses:
+        "201":
+          description: Evaluation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Evaluation"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /evaluations/{id}:
+    get:
+      operationId: getEvaluation
+      tags: [evaluations]
+      summary: Get a single evaluation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Evaluation details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /evaluations/{id}/stream:
+    get:
+      operationId: streamEvaluation
+      tags: [evaluations]
+      summary: Stream evaluation progress via SSE
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: SSE stream of evaluation events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +120,119 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    CreateEvaluationBody:
+      type: object
+      properties:
+        jiraTicketUrl:
+          type: string
+          description: Full Jira ticket URL (e.g. https://org.atlassian.net/browse/PROJ-123)
+        githubPrUrl:
+          type: string
+          description: Full GitHub PR URL (e.g. https://github.com/org/repo/pull/42)
+        jiraEmail:
+          type: string
+          description: Jira account email for authentication
+        jiraApiToken:
+          type: string
+          description: Jira API token for authentication
+        githubToken:
+          type: string
+          description: GitHub personal access token
+      required:
+        - jiraTicketUrl
+        - githubPrUrl
+        - jiraEmail
+        - jiraApiToken
+        - githubToken
+
+    Verdict:
+      type: string
+      enum: [pass, partial, fail, pending, running]
+
+    RequirementResult:
+      type: object
+      properties:
+        id:
+          type: string
+        requirement:
+          type: string
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        reasoning:
+          type: string
+        evidence:
+          type: array
+          items:
+            type: string
+        confidenceScore:
+          type: number
+          minimum: 0
+          maximum: 1
+      required:
+        - id
+        - requirement
+        - verdict
+        - reasoning
+        - evidence
+        - confidenceScore
+
+    Evaluation:
+      type: object
+      properties:
+        id:
+          type: string
+        jiraTicketUrl:
+          type: string
+        githubPrUrl:
+          type: string
+        jiraTicketKey:
+          type: string
+        jiraTicketSummary:
+          type: string
+        prTitle:
+          type: string
+        overallVerdict:
+          $ref: "#/components/schemas/Verdict"
+        status:
+          type: string
+          enum: [pending, running, completed, failed]
+        errorMessage:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - jiraTicketUrl
+        - githubPrUrl
+        - overallVerdict
+        - status
+        - createdAt
+
+    EvaluationDetail:
+      allOf:
+        - $ref: "#/components/schemas/Evaluation"
+        - type: object
+          properties:
+            requirementResults:
+              type: array
+              items:
+                $ref: "#/components/schemas/RequirementResult"
+          required:
+            - requirementResults
